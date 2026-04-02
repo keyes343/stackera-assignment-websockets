@@ -1,0 +1,14 @@
+# Ignore node_modules directory
+node_modules/
+
+# Ignore all log files
+*.log
+*.env
+
+# Ignore build directory
+/build
+/dist
+/src/consoleLog.json
+
+.serverless
+# yarn.lock

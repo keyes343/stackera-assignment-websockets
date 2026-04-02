@@ -1,0 +1,41 @@
+{
+  "name": "stackera-assignment",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Jeet <keyes343@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
+    "prod": "yarn build && yarn start",
+    "render": "yarn install && yarn build"
+  },
+  "_moduleAliases": {
+    "@src": "dist/",
+    "@controllers": "dist/controllers",
+    "@models": "dist/models",
+    "@services": "dist/services",
+    "@config": "dist/config"
+  },
+  "dependencies": {
+    "@types/cors": "^2.8.19",
+    "axios": "^1.14.0",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.0",
+    "express": "^5.2.1",
+    "ioredis": "^5.10.1",
+    "module-alias": "^2.3.4",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.5.0",
+    "morgan": "^1.10.1",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  }
+}
