@@ -1,8 +1,8 @@
 import Redis, { RedisOptions } from "ioredis";
 import "dotenv/config";
 
-// const IOREDIS_HOST = process.env.IOREDIS_HOST;
-const IOREDIS_HOST = "";
+const IOREDIS_HOST = process.env.IOREDIS_HOST;
+// const IOREDIS_HOST = "";
 // const TIMEOUT = process.env.IOREDIS_CONNECT_TIMEOUT
 const TIMEOUT = 1000;
 

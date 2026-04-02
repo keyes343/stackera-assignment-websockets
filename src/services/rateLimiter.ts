@@ -2,7 +2,7 @@ import { redisClient } from "@src/config/redis";
 
 export const rateLimitMiddleware = async (ipAddress: string) => {
   const key = `rate_limit:${ipAddress}`;
-
+  console.log("Rate check for:", ipAddress);
   const payload = {
     limited: false,
     message: "",
@@ -15,7 +15,7 @@ export const rateLimitMiddleware = async (ipAddress: string) => {
       await redisClient.expire(key, 60 * 10); // 10 min
     }
 
-    if (currentCount > 10) {
+    if (currentCount > 5) {
       payload.limited = true;
       payload.message = "Too many requests";
     }

@@ -5,7 +5,7 @@ type BinanceTicker = {
   E: number; // event time
 };
 
-type FormattedTicker = {
+export type FormattedTicker = {
   symbol: string;
   price: string;
   change: string;

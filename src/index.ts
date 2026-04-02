@@ -5,45 +5,110 @@ import { app } from "./app";
 import "dotenv/config";
 import WebSocket, { WebSocketServer } from "ws";
 import http from "http";
-import { latestPrices, mapBinanceStream } from "./helperFunctions";
+import {
+  FormattedTicker,
+  latestPrices,
+  mapBinanceStream,
+} from "./helperFunctions";
 import { rateLimitMiddleware } from "./services/rateLimiter";
 
 app.use(router);
 const server = http.createServer(app);
 
 const wss = new WebSocketServer({ server, path: "/ws" });
-// "wss://stream.binance.com:9443/ws/btcusdt@ticker",
-const binanceWS = new WebSocket(
-  "wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/bnbusdt@ticker",
-);
-
 const port = 5000;
+
+// ----------------------------------------
+// ----------------------------------------
+// ----------------------------------------
+// 1.     Setting up message queues
+// ----------------------------------------
+// ----------------------------------------
+// ----------------------------------------
+const messageQueue: FormattedTicker[] = [];
+function processQueue() {
+  while (messageQueue.length > 0) {
+    const message = messageQueue.shift();
+
+    if (!message) continue;
+
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message));
+      }
+    });
+  }
+}
+setInterval(processQueue, 100);
+// 1. -- END
+
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server running");
 });
 
-// WEBSOCKETS
+// ----------------------------------------
+// ----------------------------------------
+// ----------------------------------------
+// 2.   Connecting to BINANCE WEBSOCKETS
+// ----------------------------------------
+// ----------------------------------------
+// ----------------------------------------
 
-// CODEBLOCK -- Binance
-binanceWS.on("open", function open() {
-  console.log("connected");
-});
+let reconnectDelay = 1000; // start with 1 sec
+let binanceWS: WebSocket | null = null;
 
-binanceWS.on("message", function message(data) {
-  const parsed = JSON.parse(data.toString());
-  const formatted = mapBinanceStream(parsed);
+// This 'reconnect' function is called when the connection to 'binanceWS' drops
+function reconnect() {
+  console.log(`Reconnecting in ${reconnectDelay}ms...`);
+  if (binanceWS && binanceWS.readyState === WebSocket.OPEN) {
+    return;
+  }
 
-  latestPrices[formatted.symbol] = formatted;
+  setTimeout(() => {
+    reconnectDelay = Math.min(reconnectDelay * 2, 30000); // max 30 sec
+    connectToBinance();
+  }, reconnectDelay);
+}
 
-  console.log("received: %s", parsed);
-  wss.clients.forEach(function each(client) {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(formatted));
-    }
+// This 'connectToBinance' function holds the logic to connect to 'binanceWS'
+function connectToBinance() {
+  console.log("Connecting to Binance...");
+  binanceWS = new WebSocket(
+    "wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/bnbusdt@ticker",
+  );
+  // CODEBLOCK -- Binance
+  binanceWS.on("open", function open() {
+    console.log("connected");
   });
-});
 
-// CODEBLOCK -- Client
+  binanceWS.on("message", function message(data) {
+    const parsed = JSON.parse(data.toString());
+    const formatted = mapBinanceStream(parsed);
+
+    latestPrices[formatted.symbol] = formatted;
+    messageQueue.push(formatted);
+  });
+
+  binanceWS.on("close", () => {
+    console.log("Binance connection closed");
+    reconnect();
+  });
+
+  binanceWS.on("error", (err) => {
+    console.log("Binance error:", err.message);
+    binanceWS?.close(); // triggers reconnect
+  });
+}
+
+connectToBinance();
+
+// ----------------------------------------
+// ----------------------------------------
+// ----------------------------------------
+// 3.      Connecting to CLIENTS
+// ----------------------------------------
+// ----------------------------------------
+// ----------------------------------------
 wss.on("connection", async function connection(clientSocket, req) {
   const ipHeader = req.headers["x-forwarded-for"];
 
@@ -54,7 +119,7 @@ wss.on("connection", async function connection(clientSocket, req) {
   try {
     const limitChecker = await rateLimitMiddleware(ip as string);
 
-    if (limitChecker) {
+    if (limitChecker.limited) {
       clientSocket.send(JSON.stringify({ error: limitChecker }));
       clientSocket.close();
       return;
