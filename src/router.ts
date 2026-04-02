@@ -3,4 +3,4 @@ import * as ctrl from "@controllers/index";
 // import { auth_check } from "@src/middlewares";
 
 export const router = Router();
-router.use("/main", ctrl.main_router);
+router.use("/price", ctrl.price_router);

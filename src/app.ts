@@ -13,9 +13,7 @@ const allowedOrigins = ["http://localhost:3000"];
 app.use(express.json());
 app.use(
   cors({
-    // origin: "http://localhost:3000",
     origin: (origin, callback) => {
-      // if(!origin)return;
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
@@ -42,9 +40,6 @@ app.get("/test", (req, res) => {
   res.status(200).send({
     msg: `Hello World 3 - ip - ${ipAddress}`,
   });
-});
-app.get("/test2", (req, res) => {
-  res.status(200).send("payload");
 });
 
 app.use("/", router);
