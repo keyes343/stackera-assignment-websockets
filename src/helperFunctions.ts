@@ -33,7 +33,7 @@ export function mapBinanceStream(
   const d = payload.data;
 
   return {
-    symbol: formatSymbol(d.s), // 👈 now formatted
+    symbol: formatSymbol(d.s),
     price: d.c,
     change: d.P,
     time: d.E,

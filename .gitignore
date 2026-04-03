@@ -8,7 +8,3 @@ node_modules/
 # Ignore build directory
 /build
 /dist
-/src/consoleLog.json
-
-.serverless
-# yarn.lock

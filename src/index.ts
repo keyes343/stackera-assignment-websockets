@@ -16,7 +16,7 @@ app.use(router);
 const server = http.createServer(app);
 
 const wss = new WebSocketServer({ server, path: "/ws" });
-const port = 5000;
+const port = 8000;
 
 // ----------------------------------------
 // ----------------------------------------
@@ -40,11 +40,6 @@ function processQueue() {
   }
 }
 setInterval(processQueue, 100);
-// 1. -- END
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server running");
-});
 
 // ----------------------------------------
 // ----------------------------------------
@@ -59,7 +54,7 @@ let binanceWS: WebSocket | null = null;
 
 // This 'reconnect' function is called when the connection to 'binanceWS' drops
 function reconnect() {
-  console.log(`Reconnecting in ${reconnectDelay}ms...`);
+  console.info(`Reconnecting in ${reconnectDelay}ms...`);
   if (binanceWS && binanceWS.readyState === WebSocket.OPEN) {
     return;
   }
@@ -72,13 +67,13 @@ function reconnect() {
 
 // This 'connectToBinance' function holds the logic to connect to 'binanceWS'
 function connectToBinance() {
-  console.log("Connecting to Binance...");
+  console.info("Connecting to Binance...");
   binanceWS = new WebSocket(
     "wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/bnbusdt@ticker",
   );
   // CODEBLOCK -- Binance
   binanceWS.on("open", function open() {
-    console.log("connected");
+    console.info("connected");
   });
 
   binanceWS.on("message", function message(data) {
@@ -90,12 +85,12 @@ function connectToBinance() {
   });
 
   binanceWS.on("close", () => {
-    console.log("Binance connection closed");
+    console.info("Binance connection closed");
     reconnect();
   });
 
   binanceWS.on("error", (err) => {
-    console.log("Binance error:", err.message);
+    console.info("Binance error:", err.message);
     binanceWS?.close(); // triggers reconnect
   });
 }
@@ -125,10 +120,10 @@ wss.on("connection", async function connection(clientSocket, req) {
       return;
     }
 
-    console.log("Client connected:", ip);
+    console.info("Client connected:", ip);
 
     clientSocket.on("message", function message(data) {
-      console.log("received: %s", data);
+      console.info("received: %s", data);
     });
     clientSocket.send("something");
   } catch (error) {
@@ -137,14 +132,9 @@ wss.on("connection", async function connection(clientSocket, req) {
   }
 });
 
-console.log("ran 1");
-
-server.listen(8000, async () => {
+server.listen(port, async () => {
   console.log("hi there");
   console.log(`[server]: Server is running at http://localhost:${port}`);
-});
-server.on("upgrade", (req) => {
-  console.log("Upgrade request received:", req.url);
 });
 
 export const handler = app;
