@@ -15,17 +15,16 @@ You can provide it in **either of the following ways**:
 When running the container from Docker Desktop:
 
 - Add an environment variable:
-  Key: IOREDIS_HOST
-  Value: redis://default:GunSg8teWDVrj6DOOLPJ2tDbFRSVa8YE@redis-19952.crce179.ap-east-1-2.ec2.redns.redis-cloud.com:29657
-
-> (This is a dummy example string)
+  > (This is a dummy example string)
+  > Key: IOREDIS_HOST
+  > Value: redis://default:GunSg8teWDVrj6DOOLPJ2tDbFRSVa8YE@redis-19952.crce179.ap-east-1-2.ec2.redns.redis-cloud.com:29657
 
 #### Steps:
 
 1. Build the image:
 
 ```bash
-docker build -t stackera-assignment .
+docker build -t stackera-assignment-websockets .
 ```
 
 2. Open Docker Desktop → run the container
@@ -37,11 +36,11 @@ docker build -t stackera-assignment .
 ### Option B — Using .env file + Docker CLI
 
 1. Create a .env file in the project root.
-2. Include this - IOREDIS_HOST=<your_redis_connection_string> (connection string should look like this dummy link - IOREDIS_HOST=redis://default:GunSg8teWDVrj6DOOLPJ2tDbFRSVa8YE@redis-19952.crce179.ap-east-1-2.ec2.redns.redis-cloud.com:29657)
+2. Include this - IOREDIS_HOST=<your_redis_connection_string>
 3. Then run
 
 ```bash
-docker run -p 8000:8000 --env-file .env stackera-assignment
+docker run -p 8000:8000 --env-file .env stackera-assignment-websockets
 ```
 
 ### Testing the WebSocket
